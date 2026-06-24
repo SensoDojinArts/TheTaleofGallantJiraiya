@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senso Dojin Arts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+  <style>
+    /* --- CUSTOM FONT INTEGRATION HERE ---
+       Replace the src URL below with the path to your Amanojaku .otf file.
+       e.g. src: url('Amanojaku_Demo.otf') format('opentype');
+    */
+    @font-face {
+      font-family: 'Amanojaku';
+      src: url('Amanojaku_Demo.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f6f1e5;
+      --bg2: #eaddca;
+      --ink: #111111;
+      --charcoal: #222222;
+      --font-main: 'Amanojaku', 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+      --font-body: 'Crimson Text', Georgia, serif;
+      --font-sub: 'Shippori Mincho', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sub);
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      min-height: 100dvh;
+      color: var(--ink);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       BACKGROUND LAYER
+    ============================================================ */
+    #bg-layer {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .noise-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.14;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .moon {
+      position: absolute; top: 10%; right: 15%;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: #fffcf2;
+      opacity: 0.75;
+      mix-blend-mode: screen;
+      box-shadow: 0 0 60px rgba(255,252,242,0.55);
+      animation: moonBreath 12s ease-in-out infinite;
+    }
+    .ink-wash-circle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .iwc1 {
+      width: 480px; height: 480px;
+      top: 10%; left: -8%;
+      background: radial-gradient(circle, rgba(17,17,17,0.06) 0%, transparent 70%);
+      animation: inkWashPulse 9s ease-in-out 0s infinite;
+    }
+    .iwc2 {
+      width: 360px; height: 360px;
+      bottom: 5%; right: -6%;
+      background: radial-gradient(circle, rgba(17,17,17,0.07) 0%, transparent 70%);
+      animation: inkWashPulse 11s ease-in-out 2s infinite;
+    }
+    .iwc3 {
+      width: 240px; height: 240px;
+      top: 55%; left: 55%;
+      background: radial-gradient(circle, rgba(17,17,17,0.05) 0%, transparent 70%);
+      animation: inkWashPulse 7s ease-in-out 4s infinite;
+    }
+    .pine-left {
+      position: absolute; top: 0; left: 0;
+      width: 340px; height: 340px;
+      opacity: 0.40;
+    }
+    .pine-right {
+      position: absolute; bottom: 0; right: 0;
+      width: 260px; height: 260px;
+      opacity: 0.18;
+      transform: scaleX(-1) rotate(-30deg);
+    }
+    .cloud-band {
+      position: absolute;
+      pointer-events: none;
+    }
+    .cloud1 {
+      top: 28%; left: -12%;
+      width: 130%; height: 120px;
+      opacity: 0.20;
+      animation: cloudDrift 22s ease-in-out infinite;
+    }
+    .cloud2 {
+      top: 60%; left: -8%;
+      width: 120%; height: 80px;
+      opacity: 0.10;
+      animation: cloudDrift 28s ease-in-out 6s infinite reverse;
+    }
+    .ink-mark {
+      position: absolute;
+      opacity: 0;
+      animation: inkMarkFade 14s ease-in-out 3s infinite;
+    }
+    .ink-mark2 {
+      position: absolute;
+      opacity: 0;
+      animation: inkMarkFade 18s ease-in-out 8s infinite;
+    }
+    .ink-mark3 {
+      position: absolute;
+      opacity: 0;
+      animation: inkMarkFade 12s ease-in-out 5s infinite;
+    }
+    .mountains { position: absolute; bottom: 0; left: 0; width: 100%; height: 40vh; }
+
+    /* ============================================================
+       INK CANVAS
+    ============================================================ */
+    #ink-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.80;
+    }
+
+    /* ============================================================
+       MAIN LAYOUT
+    ============================================================ */
+    main {
+      position: relative;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem 1rem;
+      z-index: 10;
+    }
+    @media (min-width: 640px) { main { padding: 2rem; } }
+
+    .glass-panel {
+      background: rgba(255,255,255,0.40);
+      backdrop-filter: blur(16px) saturate(110%);
+      -webkit-backdrop-filter: blur(16px) saturate(110%);
+      border: 1px solid rgba(17,17,17,0.08);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 680px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 2rem 0;
+      z-index: 10;
+      position: relative;
+      opacity: 0;
+      transform: scale(0.95) translateY(20px);
+      transition: opacity 1.2s cubic-bezier(.22,1,.36,1), transform 1.2s cubic-bezier(.22,1,.36,1);
+    }
+    @media (min-width: 768px) {
+      .glass-panel { width: 90vw; padding: 3rem; }
+    }
+    body.loaded .glass-panel { opacity: 1; transform: scale(1) translateY(0); }
+
+    /* ============================================================
+       LOGO
+    ============================================================ */
+    .logo-wrap {
+      margin-bottom: 1.25rem;
+      opacity: 0; transform: scale(0.7);
+      transition: opacity 1s ease 0.1s, transform 1s cubic-bezier(.34,1.4,.64,1) 0.1s;
+    }
+    body.loaded .logo-wrap { opacity: 1; transform: scale(1); }
+    .logo-circle {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(17,17,17,0.18);
+      box-shadow: 0 0 0 4px rgba(17,17,17,0.06), 0 4px 24px rgba(17,17,17,0.12);
+      background: #111;
+    }
+    .logo-circle img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    /* ============================================================
+       BRAND TITLE — BRUSH WRITE ANIMATION
+    ============================================================ */
+    .brand-title-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      min-height: 5.5rem;
+      overflow: visible;
+    }
+    .brand-title {
+      font-family: var(--font-main);
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      line-height: 1;
+      text-align: center;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+      display: inline-block;
+      padding: 0.35em 0.15em;
+      animation: brushWrite 5s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.1s;
+    }
+    body.loaded .brand-title { opacity: 1; }
+
+    /* ============================================================
+       HERO TITLE BLOCK
+    ============================================================ */
+    .hero-block {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.5rem;
+      margin-bottom: 0.5rem; width: 100%;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+    }
+    body.loaded .hero-block { opacity: 1; transform: translateY(0); }
+    .hero-title {
+      font-family: var(--font-main);
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      text-align: center;
+      color: var(--ink);
+      font-weight: bold;
+    }
+    .hero-sub {
+      font-family: var(--font-sub);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      color: var(--charcoal);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ============================================================
+       BRUSH DIVIDER
+    ============================================================ */
+    .brush-divider {
+      width: 100%; max-width: 400px;
+      height: 24px;
+      margin: 2rem 0;
+      opacity: 0.8;
+      opacity: 0;
+      transition: opacity 1s ease 0.5s;
+    }
+    body.loaded .brush-divider { opacity: 0.8; }
+    .brush-divider path {
+      stroke-dasharray: 420;
+      stroke-dashoffset: 420;
+      transition: stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1) 0.6s;
+    }
+    body.loaded .brush-divider path { stroke-dashoffset: 0; }
+
+    /* ============================================================
+       SOCIAL INTRO
+    ============================================================ */
+    .social-intro {
+      font-family: var(--font-sub);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 1.5rem;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transition: opacity 1s ease 0.7s;
+    }
+    body.loaded .social-intro { opacity: 1; }
+
+    /* ============================================================
+       SOCIAL GRID
+    ============================================================ */
+    .social-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (min-width: 480px) { .social-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 640px) { .social-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .social-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1.25rem;
+      border-radius: 12px;
+      border: 1px solid rgba(17,17,17,0.10);
+      background: rgba(0,0,0,0.05);
+      aspect-ratio: 1;
+      text-decoration: none;
+      color: var(--ink);
+      cursor: pointer;
+      overflow: hidden;
+      transform: scale(1) translateY(0);
+      transition: transform 0.12s cubic-bezier(.34,1.56,.64,1),
+                  background-color 0.1s ease;
+      opacity: 0; transform: translateY(20px);
+    }
+    .social-card.visible { animation: cardEntrance 0.8s cubic-bezier(.16,1,.3,1) forwards; }
+    .social-card:hover {
+      transform: scale(1.07) translateY(0) !important;
+      background: rgba(0,0,0,0.10);
+    }
+    .social-card:active { transform: scale(0.97) !important; }
+    .social-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 12px;
+      background: radial-gradient(circle, rgba(17,17,17,0.1) 0%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.1s ease, transform 0.2s ease-out;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .social-card:hover::before { opacity: 1; transform: scale(1.5); }
+
+    .card-icon {
+      width: 32px; height: 32px;
+      fill: var(--ink);
+      opacity: 0.80;
+      position: relative; z-index: 2;
+      transition: opacity 0.075s ease;
+    }
+    .social-card:hover .card-icon { opacity: 1; }
+
+    .card-label {
+      font-family: var(--font-sub);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.70);
+      font-weight: 500;
+      position: relative; z-index: 2;
+      transition: color 0.075s ease;
+    }
+    .social-card:hover .card-label { color: var(--ink); }
+
+    /* Raindrops */
+    .raindrops {
+      position: absolute; inset: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .raindrop {
+      position: absolute;
+      top: 0;
+      width: 7px; height: 13px;
+      border-radius: 50% 50% 58% 58% / 45% 45% 55% 55%;
+      background: linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 100%);
+      backdrop-filter: blur(6px) saturate(130%);
+      -webkit-backdrop-filter: blur(6px) saturate(130%);
+      border: 0.5px solid rgba(255,255,255,0.4);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.6), 0 2px 6px rgba(17,17,17,0.08);
+      animation: raindrop var(--dur) ease-in var(--delay) infinite;
+    }
+
+    /* Celebrate card */
+    #celebrate-btn {
+      cursor: pointer;
+      border: none;
+      font: inherit;
+      position: relative;
+    }
+    .burst-ring {
+      position: absolute; inset: 0;
+      border-radius: 12px;
+      border: 2px solid rgba(17,17,17,0.4);
+      pointer-events: none;
+      animation: burstRing 0.65s ease-out forwards;
+      opacity: 0;
+    }
+
+    /* ============================================================
+       WET BRUSH STROKE
+    ============================================================ */
+    .wet-stroke-wrap {
+      width: 100%;
+      margin: 2.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: visible;
+    }
+    .wet-stroke-svg { width: 100%; height: 28px; overflow: visible; }
+    .ws-main { filter: url(#inkBlur); }
+    .ws-secondary { animation: wetBrushSlide 3.8s ease-in-out infinite; }
+    .ws-drip1 { animation: drip 3s ease-in-out 0.5s infinite; transform-origin: top center; }
+    .ws-drip2 { animation: drip 3.5s ease-in-out 1.2s infinite; transform-origin: top center; }
+    .ws-drip3 { animation: drip 4s ease-in-out 0.8s infinite; transform-origin: top center; }
+
+    /* ============================================================
+       DESCRIPTION SECTION
+    ============================================================ */
+    .desc-section {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 1.2s ease 1.6s, transform 1.2s ease 1.6s;
+    }
+    body.loaded .desc-section { opacity: 1; transform: translateY(0); }
+
+    .desc-item { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .section-heading-wrap {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 4px;
+      cursor: default;
+    }
+    .section-heading {
+      font-family: var(--font-main);
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+      background: linear-gradient(90deg, #111 0%, #2a2a2a 30%, #111 55%, #1e1e1e 80%, #111 100%);
+      background-size: 280% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: headingWetInk 9s ease-in-out infinite;
+    }
+    .heading-drips {
+      position: absolute;
+      left: 0; top: 100%;
+      width: 100%; height: 32px;
+      pointer-events: none;
+      display: none;
+    }
+    .heading-drips.active { display: block; }
+    .h-drip {
+      position: absolute;
+      top: 0;
+      width: 3px;
+      background: var(--ink);
+      border-radius: 0 0 50% 50%;
+      opacity: 0;
+      transform-origin: top center;
+      animation: headingDrip 0.9s ease-out forwards;
+    }
+
+    .desc-line { width: 3rem; height: 2px; background: rgba(17,17,17,0.30); border-radius: 999px; }
+    .desc-body {
+      font-family: var(--font-body);
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      line-height: 1.85;
+      color: var(--charcoal);
+      font-style: italic;
+    }
+
+    /* ============================================================
+       MORE ABOUT US BUTTON
+    ============================================================ */
+    .more-about-us-wrap {
+      width: 100%;
+      margin-top: 3.5rem;
+      margin-bottom: 1rem;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 1s ease 2s, transform 1s ease 2s;
+    }
+    body.loaded .more-about-us-wrap { opacity: 1; transform: translateY(0); }
+
+    .more-about-us {
+      width: 100%;
+      position: relative;
+      background: rgba(14,14,14,0.82);
+      backdrop-filter: blur(22px) saturate(150%);
+      -webkit-backdrop-filter: blur(22px) saturate(150%);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 18px;
+      padding: 1.4rem 2rem;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: box-shadow 0.4s ease, transform 0.12s ease;
+    }
+    .more-about-us:hover { transform: scale(1.01); }
+    .more-about-us:active { transform: scale(0.99); }
+    .more-about-us.hovered {
+      box-shadow: 0 0 40px 4px rgba(17,17,17,0.35), inset 0 0 30px rgba(255,255,255,0.04);
+    }
+
+    .mau-shimmer {
+      position: absolute; top: 0; bottom: 0;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05) 50%, transparent);
+      pointer-events: none;
+      z-index: 1;
+      animation: mauShimmer 3.5s ease-in-out infinite;
+    }
+    .mau-ring {
+      position: absolute; inset: 0;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+      z-index: 1;
+      animation: mauRingPulse 2.8s ease-in-out infinite;
+    }
+    .mau-stroke-overlay {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 4;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+    .mau-stroke-path {
+      stroke-dasharray: 680;
+      stroke-dashoffset: 680;
+      transition: stroke-dashoffset 0.45s cubic-bezier(.4,0,.2,1);
+    }
+    .more-about-us.hovered .mau-stroke-path { stroke-dashoffset: 0; }
+
+    .mau-text {
+      font-family: var(--font-main);
+      color: white;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      letter-spacing: 0.12em;
+      position: relative; z-index: 5;
+      pointer-events: none;
+      transition: opacity 0.18s ease 0.08s;
+    }
+    .more-about-us.hovered .mau-text { opacity: 0; transition-delay: 0.08s; }
+
+    .mau-arrow {
+      position: absolute; z-index: 6;
+      display: flex; align-items: center; gap: 12px;
+      color: white;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.25) translateY(8px);
+      transition: opacity 0.32s ease 0s, transform 0.32s cubic-bezier(.34,1.56,.64,1) 0s;
+    }
+    .more-about-us.hovered .mau-arrow {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      transition-delay: 0.32s;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .site-footer {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 0;
+      transition: opacity 1s ease 2.2s;
+    }
+    body.loaded .site-footer { opacity: 0.55; }
+    .footer-text {
+      font-family: var(--font-sub);
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--charcoal);
+      font-weight: 600;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* ============================================================
+       INK EXPLOSION OVERLAY
+    ============================================================ */
+    #explosion-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .explosion {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at center, #050505 0%, #111111 45%, rgba(17,17,17,0.75) 100%);
+      animation: inkExplosion 2s cubic-bezier(.2,0,.6,1) forwards;
+    }
+
+    /* ============================================================
+       KEYFRAMES
+    ============================================================ */
+    @keyframes brushWrite {
+      0%   { clip-path: inset(-30% 100% -30% -2%); opacity: 1; }
+      55%  { clip-path: inset(-30% -2% -30% -2%);  opacity: 1; }
+      78%  { clip-path: inset(-30% -2% -30% -2%);  opacity: 1; }
+      92%  { clip-path: inset(-30% -2% -30% -2%);  opacity: 0; }
+      100% { clip-path: inset(-30% 100% -30% -2%); opacity: 0; }
+    }
+    @keyframes headingWetInk {
+      0%   { background-position: 0% center; }
+      50%  { background-position: 100% center; }
+      100% { background-position: 0% center; }
+    }
+    @keyframes inkWashPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(1.06); }
+    }
+    @keyframes moonBreath {
+      0%, 100% { opacity: 0.75; box-shadow: 0 0 60px rgba(255,252,242,0.55); }
+      50%       { opacity: 0.9;  box-shadow: 0 0 90px rgba(255,252,242,0.75); }
+    }
+    @keyframes cloudDrift {
+      0%   { transform: translateX(0px); }
+      50%  { transform: translateX(18px); }
+      100% { transform: translateX(0px); }
+    }
+    @keyframes inkMarkFade {
+      0%, 100% { opacity: 0; }
+      20%, 70%  { opacity: 1; }
+    }
+    @keyframes raindrop {
+      0%   { transform: translateY(-110%) scaleX(0.75); opacity: 0; }
+      6%   { opacity: 0.7; }
+      88%  { opacity: 0.45; }
+      100% { transform: translateY(220%) scaleX(0.8);  opacity: 0; }
+    }
+    @keyframes wetBrushSlide {
+      0%   { transform: translateX(-8px) scaleY(1); }
+      25%  { transform: translateX(4px) scaleY(1.04); }
+      50%  { transform: translateX(-5px) scaleY(0.97); }
+      75%  { transform: translateX(6px) scaleY(1.03); }
+      100% { transform: translateX(-8px) scaleY(1); }
+    }
+    @keyframes drip {
+      0%   { transform: scaleY(0) translateY(0); opacity: 1; }
+      60%  { transform: scaleY(1) translateY(0); opacity: 1; }
+      100% { transform: scaleY(1) translateY(8px); opacity: 0; }
+    }
+    @keyframes headingDrip {
+      0%   { height: 0; opacity: 0; }
+      30%  { opacity: 0.7; }
+      80%  { height: 16px; opacity: 0.6; }
+      100% { height: 20px; opacity: 0; }
+    }
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes burstRing {
+      from { opacity: 0.9; transform: scale(1); }
+      to   { opacity: 0;   transform: scale(2.2); }
+    }
+    @keyframes mauShimmer {
+      0%   { transform: translateX(-120%); }
+      60%  { transform: translateX(280%); }
+      100% { transform: translateX(280%); }
+    }
+    @keyframes mauRingPulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50%       { opacity: 0.9; transform: scale(1.005); }
+    }
+    @keyframes inkExplosion {
+      0%   { clip-path: circle(var(--r) at var(--ox) var(--oy)); opacity: 1; }
+      42%  { clip-path: circle(200vmax at var(--ox) var(--oy)); opacity: 1; }
+      100% { clip-path: circle(200vmax at var(--ox) var(--oy)); opacity: 0; }
+    }
+    @keyframes splatOut {
+      0%   { transform: translate(0,0) scale(0); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0.8); opacity: 0; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NOISE OVERLAY
+============================================================ -->
+<div class="noise-overlay"></div>
+
+<!-- ============================================================
+     BACKGROUND LAYER
+============================================================ -->
+<div id="bg-layer">
+  <!-- Moon -->
+  <div class="moon"></div>
+
+  <!-- Ink wash circles -->
+  <div class="ink-wash-circle iwc1"></div>
+  <div class="ink-wash-circle iwc2"></div>
+  <div class="ink-wash-circle iwc3"></div>
+
+  <!-- Pine branch left -->
+  <svg class="pine-left" viewBox="0 0 200 200" fill="none">
+    <path d="M-20,20 C40,40 80,10 120,60 C140,85 150,110 180,120" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+    <path d="M40,30 C60,50 70,80 100,90" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M80,45 C110,60 130,50 160,80" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M120,60 L110,40 M120,60 L130,40 M120,60 L140,45 M100,90 L90,70 M100,90 L110,70 M160,80 L150,60 M160,80 L170,60" stroke="#111" stroke-width="1" stroke-linecap="round"/>
+  </svg>
+
+  <!-- Pine branch right -->
+  <svg class="pine-right" viewBox="0 0 200 200" fill="none">
+    <path d="M-20,20 C40,40 80,10 120,60 C140,85 150,110 180,120" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M80,45 C110,60 130,50 160,80" stroke="#111" stroke-width="1" stroke-linecap="round"/>
+    <path d="M120,60 L110,40 M120,60 L130,40 M120,60 L140,45" stroke="#111" stroke-width="0.8" stroke-linecap="round"/>
+  </svg>
+
+  <!-- Cloud band 1 -->
+  <svg class="cloud-band cloud1" viewBox="0 0 1000 100" fill="none" preserveAspectRatio="none">
+    <path d="M0,50 Q200,80 400,40 T800,60 T1200,40 L1200,100 L0,100 Z" fill="#eaddca"/>
+    <path d="M0,50 Q200,80 400,40 T800,60 T1200,40" stroke="#111" stroke-width="0.5"/>
+    <path d="M100,70 Q300,90 500,50 T900,70 T1200,50" stroke="#111" stroke-width="0.5" stroke-dasharray="4 4"/>
+  </svg>
+
+  <!-- Cloud band 2 -->
+  <svg class="cloud-band cloud2" viewBox="0 0 1000 80" fill="none" preserveAspectRatio="none">
+    <path d="M0,40 Q250,65 500,35 T1000,50 L1000,80 L0,80 Z" fill="#eaddca" opacity="0.6"/>
+    <path d="M0,40 Q250,65 500,35 T1000,50" stroke="#111" stroke-width="0.4" opacity="0.5"/>
+  </svg>
+
+  <!-- Ink marks -->
+  <svg class="ink-mark" style="top:15%;left:5%;width:4px;height:120px;" viewBox="0 0 4 120">
+    <path d="M2,0 C1,30 3,60 2,90 C1,105 2,115 2,120" stroke="#111" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+  </svg>
+  <svg class="ink-mark2" style="top:40%;right:6%;width:3px;height:90px;" viewBox="0 0 3 90">
+    <path d="M1.5,0 C1,25 2,50 1.5,70 C1,82 1.5,90 1.5,90" stroke="#111" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+  </svg>
+  <svg class="ink-mark3" style="bottom:20%;left:8%;width:2px;height:70px;" viewBox="0 0 2 70">
+    <path d="M1,0 L1,70" stroke="#111" stroke-width="2" stroke-linecap="round" opacity="0.2"/>
+  </svg>
+
+  <!-- Seigaiha pattern (subtle) -->
+  <svg style="position:absolute;bottom:0;left:0;width:100%;height:160px;opacity:0.04;" viewBox="0 0 800 160" preserveAspectRatio="xMidYMid slice">
+    <g id="sg"></g>
+  </svg>
+
+  <!-- Mountain silhouettes -->
+  <div class="mountains">
+    <svg style="position:absolute;bottom:0;width:100%;height:100%;opacity:0.15;" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <path d="M0,300 L0,150 Q100,100 200,180 T450,120 T700,200 T1000,100 L1000,300 Z" fill="#5c6360"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;width:100%;height:80%;opacity:0.20;" viewBox="0 0 1000 250" preserveAspectRatio="none">
+      <path d="M0,250 L0,100 Q150,50 250,120 T500,60 T800,150 T1000,80 L1000,250 Z" fill="#444a47"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;width:100%;height:60%;opacity:0.25;" viewBox="0 0 1000 200" preserveAspectRatio="none">
+      <path d="M0,200 L0,80 Q100,20 200,100 T400,40 T650,120 T850,50 T1000,90 L1000,200 Z" fill="#2d312f"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ============================================================
+     INK CANVAS
+============================================================ -->
+<canvas id="ink-canvas"></canvas>
+
+<!-- ============================================================
+     INK EXPLOSION OVERLAY
+============================================================ -->
+<div id="explosion-overlay"></div>
+
+<!-- ============================================================
+     MAIN CONTENT
+============================================================ -->
+<main>
+  <div class="glass-panel">
+
+    <!-- Logo -->
+    <!-- Replace 'logo.png' with your actual logo filename (the Ouroboros frog/snake image) -->
+    <div class="logo-wrap">
+      <div class="logo-circle">
+        <img src="logo.png" alt="Senso Dojin Arts logo" />
+      </div>
+    </div>
+
+    <!-- Brand Title — Brush Write Animation -->
+    <div class="brand-title-wrap">
+      <h1 class="brand-title">Senso Dojin Arts</h1>
+    </div>
+
+    <!-- Hero Title Block -->
+    <div class="hero-block">
+      <h2 class="hero-title">THE HEROIC TALE OF GALLANT JIRAIYA</h2>
+      <p class="hero-sub">GOKETSU MONOGATARI</p>
+    </div>
+
+    <!-- Brush Divider -->
+    <svg class="brush-divider" viewBox="0 0 400 20" fill="none">
+      <defs></defs>
+      <path d="M 5,10 Q 50,5 100,12 T 200,8 T 300,14 T 395,10"
+            stroke="#111111" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="420" opacity="0.35"/>
+      <path d="M 10,12 Q 60,8 110,14 T 210,10 T 290,12 T 385,8"
+            stroke="#111111" stroke-width="1.5" stroke-linecap="round"
+            stroke-dasharray="420" opacity="0.20"/>
+    </svg>
+
+    <!-- Social Intro -->
+    <p class="social-intro">All social links to Senso Dojin Arts</p>
+
+    <!-- Social Grid -->
+    <div class="social-grid" id="social-grid">
+
+      <!-- YouTube -->
+      <a class="social-card" href="https://www.youtube.com/channel/UCnZTyU2M_wo1qIyVSRDRgEg" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M21.582 6.186a2.6 2.6 0 0 0-1.838-1.851C18.122 3.9 12 3.9 12 3.9s-6.122 0-7.744.435a2.6 2.6 0 0 0-1.838 1.851C2 7.828 2 12 2 12s0 4.172.418 5.814a2.6 2.6 0 0 0 1.838 1.851C5.878 20.1 12 20.1 12 20.1s6.122 0 7.744-.435a2.6 2.6 0 0 0 1.838-1.851C22 16.172 22 12 22 12s0-4.172-.418-5.814ZM9.95 15.45V8.55L15.95 12l-6 3.45Z"/></svg>
+        <span class="card-label">YouTube</span>
+      </a>
+
+      <!-- X -->
+      <a class="social-card" href="https://x.com/SensoDojinArts" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span class="card-label">X</span>
+      </a>
+
+      <!-- Instagram -->
+      <a class="social-card" href="https://www.instagram.com/sensodojinarts/" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        <span class="card-label">Instagram</span>
+      </a>
+
+      <!-- TikTok -->
+      <a class="social-card" href="https://www.tiktok.com/@SensoDojinArts" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M19.321 5.562a5.122 5.122 0 0 1-.443-.258 6.228 6.228 0 0 1-1.137-.984c-.849-.966-1.166-1.959-1.282-2.656h.004C16.393 1.275 16.44 1 16.44 1h-3.807v14.192c0 .193 0 .383-.008.571a.59.59 0 0 1-.007.077v.02a3.167 3.167 0 0 1-1.57 2.527 3.128 3.128 0 0 1-1.569.417c-1.74 0-3.151-1.42-3.151-3.172 0-1.752 1.412-3.172 3.151-3.172.34 0 .667.054.975.152V8.76a6.953 6.953 0 0 0-.975-.068C6.01 8.692 3 11.718 3 15.454 3 19.19 6.01 22.215 9.721 22.215c3.712 0 6.721-3.025 6.721-6.761V9.135a9.96 9.96 0 0 0 5.802 1.845V7.175a6.294 6.294 0 0 1-2.923-1.613z"/></svg>
+        <span class="card-label">TikTok</span>
+      </a>
+
+      <!-- Discord -->
+      <a class="social-card" href="https://discord.gg/YnwuWQ7S4" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        <span class="card-label">Discord</span>
+      </a>
+
+      <!-- Reddit -->
+      <a class="social-card" href="https://www.reddit.com/user/SensoDojinArts/" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.508 1.207-.893 2.902-1.474 4.776-1.528l.892-4.197a.301.301 0 0 1 .328-.236l2.898.608a1.26 1.26 0 0 1 .998-.653zm-7.669 6.273c-.76 0-1.378.618-1.378 1.378 0 .76.618 1.378 1.378 1.378.76 0 1.378-.618 1.378-1.378 0-.76-.618-1.378-1.378-1.378zm5.32 0c-.76 0-1.378.618-1.378 1.378 0 .76.618 1.378 1.378 1.378.76 0 1.378-.618 1.378-1.378 0-.76-.618-1.378-1.378-1.378zm-2.66 3.916c-1.385 0-2.484.536-2.484 1.196h4.968c0-.66-1.099-1.196-2.484-1.196z"/></svg>
+        <span class="card-label">Reddit</span>
+      </a>
+
+      <!-- Facebook -->
+      <a class="social-card" href="https://www.facebook.com/profile.php?id=61591414348804" target="_blank" rel="noopener noreferrer">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        <span class="card-label">Facebook</span>
+      </a>
+
+      <!-- Celebrate -->
+      <button class="social-card" id="celebrate-btn">
+        <div class="raindrops"></div>
+        <svg class="card-icon" viewBox="0 0 24 24"><path d="M20.71 4.04c.39-.39.39-1.02 0-1.41l-1.34-1.34c-.39-.39-1.02-.39-1.41 0l-9.12 9.12 2.75 2.75 9.12-9.12zM4 16.87l-.09 3.22 3.22-.09 7.15-7.15-2.75-2.75L4 16.87z"/></svg>
+        <span class="card-label">Celebrate</span>
+      </button>
+
+    </div><!-- .social-grid -->
+
+    <!-- Wet Brush Stroke -->
+    <div class="wet-stroke-wrap">
+      <svg class="wet-stroke-svg" viewBox="0 0 440 28" fill="none" overflow="visible">
+        <defs>
+          <filter id="inkBlur" x="-5%" y="-50%" width="110%" height="200%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" result="noise" seed="2"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+        </defs>
+        <path id="ws-main-path"
+          d="M 0,16 C 40,8 80,22 120,14 C 160,6 200,20 240,12 C 280,4 320,18 360,10 C 390,5 420,14 440,12"
+          stroke="#111111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"
+          opacity="0.88" filter="url(#inkBlur)" class="ws-main"/>
+        <path
+          d="M 10,17 C 50,10 90,21 130,15 C 170,8 210,19 250,13 C 290,7 330,17 370,11 C 400,7 425,13 440,12"
+          stroke="#111111" stroke-width="4" stroke-linecap="round" opacity="0.35" class="ws-secondary"/>
+        <ellipse cx="85"  cy="22" rx="3" ry="4" fill="#111" opacity="0.7" class="ws-drip1"/>
+        <ellipse cx="210" cy="22" rx="2" ry="3" fill="#111" opacity="0.6" class="ws-drip2"/>
+        <ellipse cx="350" cy="20" rx="2.5" ry="3.5" fill="#111" opacity="0.65" class="ws-drip3"/>
+      </svg>
+    </div>
+
+    <!-- Description Section -->
+    <div class="desc-section">
+
+      <div class="desc-item">
+        <div class="section-heading-wrap">
+          <h3 class="section-heading">The Origins of a Legend</h3>
+          <div class="heading-drips" data-positions="8,22,40,58,75,88"></div>
+        </div>
+        <div class="desc-line"></div>
+        <p class="desc-body">Born from the pages of Kanwatei Onitake's 1806 yomihon (reading book) titled Katakiuchi Kidan Jiraiya Monogatari, this sprawling epic of supernatural vendetta and shapeshifting sorcery represents a cultural monument of the Edo period. Emerging during the prolonged peace of the Tokugawa shogunate, the tale provided an escapist narrative that captivated the urban reading public. It eventually found its definitive, serialized form across forty-three installments published between 1839 and 1868.</p>
+      </div>
+
+      <div class="desc-item">
+        <div class="section-heading-wrap">
+          <h3 class="section-heading">The Protagonists & The Three-Way Deadlock</h3>
+          <div class="heading-drips" data-positions="5,18,35,52,68,82"></div>
+        </div>
+        <div class="desc-line"></div>
+        <p class="desc-body">At the heart of the narrative moves Ogata Shuma Hiroyuki — a masterless samurai known as Jiraiya, or "Young Thunder". Taught the mystical arts of toad magic by the immortal sage Senso Dojin, Jiraiya navigates a volatile world of clan rivalries, wrongful imprisonment, and blood oaths. Their conflict is dictated by the Sansukumi — a traditional Japanese three-way deadlock: the snake devours the toad, the toad consumes the slug, the slug's acid dissolves the snake.</p>
+      </div>
+
+      <div class="desc-item">
+        <div class="section-heading-wrap">
+          <h3 class="section-heading">Themes of Retribution and Karma</h3>
+          <div class="heading-drips" data-positions="10,25,42,60,77,90"></div>
+        </div>
+        <div class="desc-line"></div>
+        <p class="desc-body">Beyond the spectacle of giant beasts and elemental clashes, the tale is anchored by profound philosophical and moral frameworks. It is fundamentally a story of katakiuchi (vendetta or revenge). Influenced by the Kansei Reforms, the narrative incorporates strict Confucian and Buddhist principles — kanzen chōaku (the rewarding of good and the punishing of evil) and inga ōhō (karmic cause and effect).</p>
+      </div>
+
+      <div class="desc-item">
+        <div class="section-heading-wrap">
+          <h3 class="section-heading">A Convergence of Master Artists</h3>
+          <div class="heading-drips" data-positions="7,21,38,55,72,86"></div>
+        </div>
+        <div class="desc-line"></div>
+        <p class="desc-body">The serialized run of Jiraiya Gōketsu Monogatari was a collaborative marathon spanning the twilight of the Edo period and the dawn of the Meiji era. Successive generations of authors and illustrators whose woodblock prints brought the supernatural battles to vivid, unforgettable life — cementing the tale as one of the most enduring works of Japanese popular fiction.</p>
+      </div>
+
+    </div><!-- .desc-section -->
+
+    <!-- More About Us Button -->
+    <div class="more-about-us-wrap">
+      <div class="more-about-us" id="more-about-us">
+        <div class="mau-shimmer"></div>
+        <div class="mau-ring"></div>
+        <div class="mau-stroke-overlay">
+          <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 600 72" style="display:block;">
+            <path class="mau-stroke-path"
+              d="M -20,36 C 80,28 160,44 260,34 T 420,38 T 620,36"
+              stroke="#111111" stroke-width="90" stroke-linecap="round" fill="none"
+              stroke-dasharray="680" stroke-dashoffset="680"/>
+          </svg>
+        </div>
+        <span class="mau-text">More About Us</span>
+        <div class="mau-arrow">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <line x1="6" y1="18" x2="30" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="20,10 30,18 20,26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <svg width="20" height="12" viewBox="0 0 40 20" fill="none">
+        <path d="M20 0 C8 0 0 5 0 10 C0 15 8 20 20 20 C32 20 40 15 40 10" stroke="#111" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+        <circle cx="20" cy="10" r="2" fill="#111" opacity="0.5"/>
+      </svg>
+      <p class="footer-text">All Copyrights Reserved 2026 &mdash; Senso Dojin Arts</p>
+    </footer>
+
+  </div><!-- .glass-panel -->
+</main>
+
+<script>
+/* ============================================================
+   SEIGAIHA PATTERN (build dynamically)
+============================================================ */
+(function() {
+  const g = document.getElementById('sg');
+  if (!g) return;
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 14; col++) {
+      const cx = col * 60 - 30 + (row % 2) * 30;
+      const cy = row * 40 + 40;
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', `M${cx-25},${cy} Q${cx-25},${cy-28} ${cx},${cy-28} Q${cx+25},${cy-28} ${cx+25},${cy}`);
+      p.setAttribute('stroke', '#111');
+      p.setAttribute('stroke-width', '1');
+      p.setAttribute('fill', 'none');
+      g.appendChild(p);
+    }
+  }
+})();
+
+/* ============================================================
+   RAINDROPS — inject into each card
+============================================================ */
+const DROPS = [
+  { left: '18%', delay: '0s',   dur: '4.2s' },
+  { left: '48%', delay: '1.4s', dur: '3.8s' },
+  { left: '74%', delay: '0.7s', dur: '5.1s' },
+  { left: '33%', delay: '2.6s', dur: '4.6s' },
+];
+document.querySelectorAll('.raindrops').forEach(container => {
+  DROPS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'raindrop';
+    el.style.setProperty('--dur', d.dur);
+    el.style.setProperty('--delay', d.delay);
+    el.style.left = d.left;
+    container.appendChild(el);
+  });
+});
+
+/* ============================================================
+   ENTRY ANIMATION TRIGGER
+============================================================ */
+window.addEventListener('load', () => {
+  document.body.classList.add('loaded');
+
+  // Stagger social card entrances
+  document.querySelectorAll('.social-card').forEach((card, i) => {
+    setTimeout(() => card.classList.add('visible'), 800 + i * 100);
+  });
+});
+
+/* ============================================================
+   INK CANVAS — drips + splats
+============================================================ */
+const canvas = document.getElementById('ink-canvas');
+const ctx    = canvas.getContext('2d');
+let drips = [], splats = [];
+let lastDripSpawn = 0, lastSplatSpawn = 0;
+let raf;
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function spawnDrip(yOff = 0) {
+  drips.push({
+    x:       Math.random() * canvas.width,
+    y:       -100 + yOff,
+    width:   1 + Math.random() * 3.5,
+    length:  20 + Math.random() * 90,
+    speed:   0.2 + Math.random() * 0.7,
+    opacity: 0.10 + Math.random() * 0.12,
+  });
+}
+
+function spawnSplat() {
+  const armCount = 5 + Math.floor(Math.random() * 7);
+  splats.push({
+    x:         Math.random() * canvas.width,
+    y:         Math.random() * canvas.height,
+    radius:    0,
+    maxRadius: 6 + Math.random() * 18,
+    opacity:   0.08 + Math.random() * 0.12,
+    growing:   true,
+    arms: Array.from({ length: armCount }, () => ({
+      angle:  Math.random() * Math.PI * 2,
+      length: 10 + Math.random() * 30,
+      width:  0.5 + Math.random() * 1.5,
+    })),
+  });
+}
+
+for (let i = 0; i < 10; i++) spawnDrip(Math.random() * window.innerHeight);
+for (let i = 0; i < 8;  i++) spawnSplat();
+
+function renderInk(time) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (time - lastDripSpawn  > 2000 + Math.random() * 2000) { spawnDrip();  lastDripSpawn  = time; }
+  if (time - lastSplatSpawn > 1500 + Math.random() * 2500) { spawnSplat(); lastSplatSpawn = time; }
+
+  // Drips
+  for (let i = drips.length - 1; i >= 0; i--) {
+    const d = drips[i];
+    d.y += d.speed;
+    const dist = canvas.height - d.y;
+    const op   = dist < 200 ? d.opacity * (dist / 200) : d.opacity;
+    if (op > 0.005 && d.y - d.length < canvas.height + 50) {
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y - d.length);
+      ctx.lineTo(d.x, d.y);
+      ctx.lineWidth   = d.width;
+      ctx.lineCap     = 'round';
+      ctx.strokeStyle = `rgba(17,17,17,${op})`;
+      ctx.stroke();
+    } else { drips.splice(i, 1); }
+  }
+
+  // Splats
+  for (let i = splats.length - 1; i >= 0; i--) {
+    const s = splats[i];
+    if (s.growing) { s.radius += 0.18; if (s.radius >= s.maxRadius) s.growing = false; }
+    else           { s.opacity -= 0.0003; }
+    if (s.opacity <= 0.005) { splats.splice(i, 1); continue; }
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(17,17,17,${s.opacity})`;
+    ctx.fill();
+    const prog = Math.min(s.radius / s.maxRadius, 1);
+    s.arms.forEach(arm => {
+      const len = arm.length * prog;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x + Math.cos(arm.angle) * len, s.y + Math.sin(arm.angle) * len);
+      ctx.lineWidth   = arm.width;
+      ctx.lineCap     = 'round';
+      ctx.strokeStyle = `rgba(17,17,17,${s.opacity * 0.7})`;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(s.x + Math.cos(arm.angle) * len, s.y + Math.sin(arm.angle) * len, arm.width * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(17,17,17,${s.opacity * 0.5})`;
+      ctx.fill();
+    });
+  }
+
+  raf = requestAnimationFrame(renderInk);
+}
+raf = requestAnimationFrame(renderInk);
+
+/* ============================================================
+   WET BRUSH STROKE — path morph
+============================================================ */
+const wsPath   = document.getElementById('ws-main-path');
+const wsBase   = 'M 0,16 C 40,8 80,22 120,14 C 160,6 200,20 240,12 C 280,4 320,18 360,10 C 390,5 420,14 440,12';
+const wsVars   = [
+  'M 0,16 C 40,10 80,20 120,13 C 160,7 200,22 240,11 C 280,5 320,17 360,11 C 390,6 420,15 440,12',
+  'M 0,14 C 40,6 80,22 120,16 C 160,9 200,18 240,14 C 280,7 320,20 360,9  C 390,4 420,13 440,11',
+  'M 0,18 C 40,12 80,24 120,12 C 160,5 200,16 240,13 C 280,8 320,22 360,12 C 390,7 420,16 440,14',
+];
+let wsIdx = 0;
+setInterval(() => {
+  if (wsPath) wsPath.setAttribute('d', wsVars[wsIdx % wsVars.length]);
+  wsIdx++;
+  setTimeout(() => { if (wsPath) wsPath.setAttribute('d', wsBase); }, 1200);
+}, 2400);
+
+/* ============================================================
+   HEADING DRIPS — hover
+============================================================ */
+document.querySelectorAll('.section-heading-wrap').forEach(wrap => {
+  const dripsEl    = wrap.querySelector('.heading-drips');
+  const positions  = dripsEl.dataset.positions.split(',');
+
+  wrap.addEventListener('mouseenter', () => {
+    dripsEl.innerHTML = '';
+    positions.forEach((pct, i) => {
+      const d = document.createElement('div');
+      d.className = 'h-drip';
+      d.style.left         = pct + '%';
+      d.style.width        = (i % 2 === 0 ? 3 : 2) + 'px';
+      d.style.animationDelay = (i * 0.08) + 's';
+      dripsEl.appendChild(d);
+    });
+    dripsEl.classList.add('active');
+  });
+  wrap.addEventListener('mouseleave', () => {
+    dripsEl.classList.remove('active');
+    dripsEl.innerHTML = '';
+  });
+});
+
+/* ============================================================
+   CELEBRATE BUTTON — full page ink explosion
+============================================================ */
+document.getElementById('celebrate-btn').addEventListener('click', function(e) {
+  const rect = this.getBoundingClientRect();
+  const cx   = rect.left + rect.width  / 2;
+  const cy   = rect.top  + rect.height / 2;
+
+  // Page explosion
+  const overlay = document.getElementById('explosion-overlay');
+  const exp     = document.createElement('div');
+  exp.className = 'explosion';
+  exp.style.setProperty('--ox', cx + 'px');
+  exp.style.setProperty('--oy', cy + 'px');
+  exp.style.setProperty('--r', '0px');
+  overlay.appendChild(exp);
+  setTimeout(() => overlay.removeChild(exp), 2100);
+
+  // Card burst ring
+  const ring = document.createElement('div');
+  ring.className = 'burst-ring';
+  this.appendChild(ring);
+  setTimeout(() => ring.remove(), 700);
+
+  // Card ink splats
+  for (let i = 0; i < 16; i++) {
+    const angle    = (i / 16) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+    const distance = 32 + Math.random() * 55;
+    const size     = 4 + Math.random() * 12;
+    const dot      = document.createElement('div');
+    dot.style.cssText = `
+      position: absolute;
+      left: ${48 + (Math.random() - 0.5) * 20}%;
+      top:  ${48 + (Math.random() - 0.5) * 20}%;
+      width: ${size}px; height: ${size}px;
+      border-radius: 50%;
+      background: #111;
+      z-index: 30;
+      pointer-events: none;
+      --tx: ${Math.cos(angle) * distance}px;
+      --ty: ${Math.sin(angle) * distance}px;
+      animation: splatOut 0.8s ease-out forwards;
+    `;
+    this.appendChild(dot);
+    setTimeout(() => dot.remove(), 850);
+  }
+});
+
+/* ============================================================
+   MORE ABOUT US BUTTON — hover
+============================================================ */
+const mauBtn  = document.getElementById('more-about-us');
+const mauPath = mauBtn.querySelector('.mau-stroke-path');
+
+mauBtn.addEventListener('mouseenter', () => {
+  mauBtn.classList.add('hovered');
+  mauPath.style.transition = 'stroke-dashoffset 0.45s cubic-bezier(.4,0,.2,1)';
+  mauPath.style.strokeDashoffset = '0';
+});
+mauBtn.addEventListener('mouseleave', () => {
+  mauBtn.classList.remove('hovered');
+  mauPath.style.transition = 'stroke-dashoffset 0.35s cubic-bezier(.4,0,.2,1) 0.1s';
+  mauPath.style.strokeDashoffset = '680';
+});
+</script>
+</body>
+</html>
