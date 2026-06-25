@@ -149,61 +149,6 @@
     }
 
     /* ============================================================
-       CHARACTER FIGURES — woodblock flanking art
-    ============================================================ */
-    .char-figure {
-      position: fixed;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 3;
-      mix-blend-mode: multiply;
-    }
-
-    .char-jiraiya {
-      right: 0;
-      height: clamp(300px, 60vh, 560px);
-      width: auto;
-      filter: drop-shadow(-10px -2px 28px rgba(17,17,17,0.18));
-      animation:
-        charEnterRight 1.8s cubic-bezier(.22,1,.36,1) 1.2s both,
-        charFloatRight 11s ease-in-out 3s infinite;
-    }
-
-    .char-tsunade {
-      left: 0;
-      height: clamp(270px, 54vh, 500px);
-      width: auto;
-      filter: drop-shadow(10px -2px 28px rgba(17,17,17,0.18));
-      animation:
-        charEnterLeft 1.8s cubic-bezier(.22,1,.36,1) 1.5s both,
-        charFloatLeft 13s ease-in-out 3.3s infinite;
-    }
-
-    @media (max-width: 1099px) { .char-figure { display: none; } }
-
-    @media (min-width: 1100px) and (max-width: 1349px) {
-      .char-jiraiya { height: clamp(220px, 44vh, 380px); }
-      .char-tsunade { height: clamp(200px, 40vh, 340px); }
-    }
-
-    @keyframes charEnterRight {
-      from { opacity: 0;    transform: translateX(42%) translateY(16px); }
-      to   { opacity: 0.92; transform: translateX(14%) translateY(0);    }
-    }
-    @keyframes charEnterLeft {
-      from { opacity: 0;    transform: translateX(-38%) translateY(16px); }
-      to   { opacity: 0.88; transform: translateX(-9%)  translateY(0);    }
-    }
-    @keyframes charFloatRight {
-      0%, 100% { transform: translateX(14%) translateY(0);    }
-      50%       { transform: translateX(14%) translateY(-13px); }
-    }
-    @keyframes charFloatLeft {
-      0%, 100% { transform: translateX(-9%) translateY(0);   }
-      50%       { transform: translateX(-9%) translateY(-9px); }
-    }
-
-    /* ============================================================
        MAIN LAYOUT
     ============================================================ */
     main {
@@ -834,12 +779,6 @@
      INK CANVAS
 ============================================================ -->
 <canvas id="ink-canvas"></canvas>
-
-<!-- ============================================================
-     CHARACTER FIGURES — Jiraiya & Tsunade
-============================================================ -->
-<img class="char-figure char-jiraiya" src="jiraiya.png" alt="Jiraiya — Young Thunder" />
-<img class="char-figure char-tsunade" src="tsunade.png" alt="Tsunade — Slug Princess" />
 
 <!-- ============================================================
      INK EXPLOSION OVERLAY
